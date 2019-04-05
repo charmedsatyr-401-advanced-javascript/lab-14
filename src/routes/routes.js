@@ -5,6 +5,10 @@ const auth = require('../auth/middleware.js');
 const Role = require('../auth/roles-model.js');
 const Users = require('../auth/users-model.js');
 
+router.get('/', (req, res, next) => {
+  res.status(200).send('Server up and running...');
+});
+
 // Use to populate roles
 router.post('/roles', (req, res, next) => {
   const role = new Role(req.body);
