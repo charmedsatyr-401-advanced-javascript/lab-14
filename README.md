@@ -83,6 +83,13 @@ Using the `httpie` application or a similar program, send the following commands
 `admin` capabilities:
 * `echo '{"username":"admin", "password":"admin", "role":"admin"}' | http post :3000/signup`
 
+###### Using Protected Routes
+You can interact with the protected routes using the following syntax and making substitutions for the words in all caps:
+
+* `http METHOD :3000/ROUTE -a USERNAME:PASSWORD`
+
+Note that not all routes function as documented.
+
 #### Tests
 * How do you run tests?
   * `npm run test`
