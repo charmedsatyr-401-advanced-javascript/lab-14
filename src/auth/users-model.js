@@ -25,7 +25,7 @@ const users = new mongoose.Schema(
 users.virtual('capabilities', {
   ref: 'roles',
   localField: 'role',
-  foreignField: 'role', // role
+  foreignField: 'role',
   justOne: false,
 });
 
@@ -49,6 +49,8 @@ users.pre('save', function(next) {
     });
 });
 
+// This object should be deleted once the virtual join is
+// sorted out!
 const capabilities = {
   admin: ['create', 'read', 'update', 'delete'],
   editor: ['create', 'read', 'update'],
@@ -122,7 +124,7 @@ users.methods.generateToken = function(type) {
   return jwt.sign(token, SECRET, options);
 };
 
-users.methods.can = async function(capability) {
+users.methods.can = function(capability) {
   return capabilities[this.role].includes(capability);
 };
 
