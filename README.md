@@ -60,6 +60,7 @@ Note that a virtual "join" between the `roles` and `users` database collections 
 #### Running the app
 * Start a MongoDB database on your local machine that uses the `data` folder.
 * Start the server on your local machine with `npm run start` or `npm run watch`.
+* Ensure you have appropriate environmental variables set for `MONGODB_URI`, `PORT`, and `SECRET`.
 
 ###### Populating the `roles` collection
 The `roles` in the collection currently take hardcoded `capabilities` from a `capabilities` object in `./src/auth/users-model.js`. However, if the virtual join between the `roles` and `users` tables were fixed, you would need to populate the `roles` collection with the following commands from `httpie` or a similar program: 
