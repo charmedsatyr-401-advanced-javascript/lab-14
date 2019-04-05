@@ -1,6 +1,9 @@
 # Data
 data
 
+# Testing key
+key.txt
+
 # Logs
 logs
 *.log

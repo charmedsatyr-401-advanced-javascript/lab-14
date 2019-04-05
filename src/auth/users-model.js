@@ -11,18 +11,31 @@ const SECRET = process.env.SECRET || 'foobar';
 
 const usedTokens = new Set();
 
-const users = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  email: { type: String },
-  role: { type: String, default: 'user', enum: ['admin', 'editor', 'user'] },
+const users = new mongoose.Schema(
+  {
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    email: { type: String },
+    role: { type: String, default: 'user', enum: ['admin', 'editor', 'user'] },
+  },
+  { toObject: { virtuals: true }, toJSON: { virtuals: true } }
+);
+
+// The info is at user.capabilities[0].capabilities
+users.virtual('capabilities', {
+  ref: 'roles',
+  localField: 'role',
+  foreignField: 'role', // role
+  justOne: false,
 });
 
-const capabilities = {
-  admin: ['create', 'read', 'update', 'delete'],
-  editor: ['create', 'read', 'update'],
-  user: ['read'],
-};
+users.pre('find', function() {
+  try {
+    this.populate('capabilities');
+  } catch (err) {
+    console.error(err);
+  }
+});
 
 users.pre('save', function(next) {
   bcrypt
@@ -35,6 +48,12 @@ users.pre('save', function(next) {
       throw new Error(error);
     });
 });
+
+const capabilities = {
+  admin: ['create', 'read', 'update', 'delete'],
+  editor: ['create', 'read', 'update'],
+  user: ['read'],
+};
 
 users.statics.createFromOauth = function(email) {
   if (!email) {
@@ -59,6 +78,7 @@ users.statics.createFromOauth = function(email) {
 };
 
 users.statics.authenticateToken = function(token) {
+  console.log('Authenticating Token:', token);
   if (usedTokens.has(token)) {
     return Promise.reject('Invalid Token');
   }
@@ -75,6 +95,7 @@ users.statics.authenticateToken = function(token) {
 
 users.statics.authenticateBasic = function(auth) {
   let query = { username: auth.username };
+  console.log('authenticate Basic:', query);
   return this.findOne(query)
     .then(user => user && user.comparePassword(auth.password))
     .catch(error => {
@@ -101,7 +122,7 @@ users.methods.generateToken = function(type) {
   return jwt.sign(token, SECRET, options);
 };
 
-users.methods.can = function(capability) {
+users.methods.can = async function(capability) {
   return capabilities[this.role].includes(capability);
 };
 
