@@ -61,10 +61,15 @@ router.delete('/bye-bye', auth('delete'), (req, res, next) => {
   res.status(200).send('Poor fella, he died so young.');
 });
 // router.get('/everything') should require the superuser capability
-router.get('/everything', auth('read'), (req, res, next) => {
-  res.status(200).send('I BOW BEFORE YOU, MASTER');
-});
-
-// capabilities: anyone, login, read, create, update, delete, superuser
+router.get(
+  '/everything',
+  auth('create'),
+  auth('read'),
+  auth('update'),
+  auth('delete'),
+  (req, res, next) => {
+    res.status(200).send('I BOW BEFORE YOU, MASTER');
+  }
+);
 
 module.exports = router;
