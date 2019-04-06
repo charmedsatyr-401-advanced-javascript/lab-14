@@ -12,11 +12,14 @@ authRouter.post('/signup', (req, res, next) => {
   user
     .save()
     .then(user => {
-      req.token = user.generateToken();
-      req.user = user;
-      res.set('token', req.token);
-      res.cookie('auth', req.token);
-      res.send(req.token);
+      User.findOne({ _id: user._id }).then(user => {
+        console.log('USER', user);
+        req.token = user.generateToken();
+        req.user = user;
+        res.set('token', req.token);
+        res.cookie('auth', req.token);
+        res.send(req.token);
+      });
     })
     .catch(next);
 });
