@@ -26,10 +26,34 @@ users.virtual('capabilities', {
   ref: 'roles',
   localField: 'role',
   foreignField: 'role',
-  justOne: false,
+  justOne: true,
 });
 
 users.pre('find', function() {
+  try {
+    this.populate('capabilities');
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+users.pre('save', function() {
+  try {
+    this.populate('capabilities');
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+users.pre('findOne', function() {
+  try {
+    this.populate('capabilities');
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+users.pre('findById', function() {
   try {
     this.populate('capabilities');
   } catch (err) {
@@ -48,14 +72,6 @@ users.pre('save', function(next) {
       throw new Error(error);
     });
 });
-
-// This object should be deleted once the virtual join is
-// sorted out!
-const capabilities = {
-  admin: ['create', 'read', 'update', 'delete'],
-  editor: ['create', 'read', 'update'],
-  user: ['read'],
-};
 
 users.statics.createFromOauth = function(email) {
   if (!email) {
@@ -110,9 +126,10 @@ users.methods.comparePassword = function(password) {
 };
 
 users.methods.generateToken = function(type) {
+  console.log(`this from generateToken:`, this);
   let token = {
     id: this._id,
-    capabilities: capabilities[this.role],
+    capabilities: this.capabilities.capabilities,
     type: type || 'user',
   };
 
@@ -125,7 +142,8 @@ users.methods.generateToken = function(type) {
 };
 
 users.methods.can = function(capability) {
-  return capabilities[this.role].includes(capability);
+  console.log('CAPABILITIES:', this.capabilities.capabilities);
+  return this.capabilities.capabilities.includes(capability);
 };
 
 users.methods.generateKey = function() {
